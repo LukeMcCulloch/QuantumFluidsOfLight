@@ -35,11 +35,20 @@ class TimeIntegrator(object):
         self.u = grid.grid
         self.Nx = grid.Nx
         self.Ny = grid.Ny
-        self.dx = 
+        self.dx = grid.hx
+        self.dy = grid.hy
         
     def DDx(self, i,j):
         u = self.u
-        return  (u[i-1,j] -2.*u[i,j] + u[i+1,j] )
+        dx = self.dx
+        return  (u[i-1,j] -2.*u[i,j] + u[i+1,j] )/dx
+        
+    def DDy(self, i,j):
+        u = self.u
+        dy = self.dy
+        return  (u[i,j-1] -2.*u[i,j] + u[i,j+1] )/dy
+    
+    
     
     
 if __name__ == """__main__""":
