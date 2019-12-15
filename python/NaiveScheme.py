@@ -38,6 +38,9 @@ class TimeIntegrator(object):
         self.dx = grid.hx
         self.dy = grid.hy
         
+    def shape(self):
+        return np.shape(self.u)
+        
     def DDx(self, i,j):
         u = self.u
         dx = self.dx
@@ -48,10 +51,18 @@ class TimeIntegrator(object):
         dy = self.dy
         return  (u[i,j-1] -2.*u[i,j] + u[i,j+1] )/dy
     
+    def IC(self):
+        mi = self.Nx/2 + 1
+        mj = self.Ny/2 + 1
+        return
     
+    def Dt(self):
+        return
     
     
 if __name__ == """__main__""":
     grid = Grid()
     self = grid
+    
+    ti = TimeIntegrator(grid)
     
