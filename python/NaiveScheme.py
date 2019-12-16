@@ -90,11 +90,11 @@ class TimeIntegrator(object):
         #nstep = maxtime / dt
         if ICfuncdict is None:
             ICfuncdict = {}
-            ICfuncdict[0] =  [self.IC, 1., 45, 45 ]
-            ICfuncdict[1] =  [self.IC, 1., 55, 55 ]
-            ICfuncdict[2] =  [self.IC, 1., 10, 55 ]
-            ICfuncdict[3] =  [self.IC, 1., 55, 10 ]
-            ICfuncdict[4] =  [self.IC, 1., 75, 75 ]
+            ICfuncdict[0] =  [self.IC, 1., self.Nx/2, 30 ]
+            ICfuncdict[1] =  [self.IC, 1., self.Nx/2, 70 ]
+            #ICfuncdict[2] =  [self.IC, 1., 10, 55 ]
+            #ICfuncdict[3] =  [self.IC, 1., 55, 10 ]
+            #ICfuncdict[4] =  [self.IC, 1., 75, 75 ]
         
         t=0.
         sc = dt/(2.*imag*self.k)
@@ -123,9 +123,9 @@ class TimeIntegrator(object):
     
     
 if __name__ == """__main__""":
-    grid = Grid()
+    grid = Grid(Nx=100, Ny=100)
     self = grid
     
     ti = TimeIntegrator(grid, k=250.)
-    ti.solve(maxtime=20.)
+    ti.solve(maxtime=25.)
     ti.plot()
