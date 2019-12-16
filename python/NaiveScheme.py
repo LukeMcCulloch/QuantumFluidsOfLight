@@ -11,7 +11,11 @@ import matplotlib.pyplot as plt
 
 # https://stackoverflow.com/questions/17044052/mathplotlib-imshow-complex-2d-array
 from colorsys import hls_to_rgb
-#import matplotlib.colors.hsv_to_rgb as hls_to_rgp 
+from matplotlib.colors import hsv_to_rgb
+
+imag = np.complex(0.,1.)
+pi = np.pi
+
 
 def colorize(z):
     n,m = z.shape
@@ -26,7 +30,33 @@ def colorize(z):
     c[idx] = [hls_to_rgb(a, b, 0.8) for a,b in zip(A,B)]
     return c
 
-imag = np.complex(0.,1.)
+def colorize2(z):
+    r = np.abs(z)
+    arg = np.angle(z) 
+
+    h = (arg + pi)  / (2 * pi) + 0.5
+    l = 1.0 - 1.0/(1.0 + r**0.3)
+    s = 0.8
+
+    c = np.vectorize(hls_to_rgb) (h,l,s) # --> tuple
+    c = np.array(c)  # -->  array of (3,n,m) shape, but need (n,m,3)
+    c = c.swapaxes(0,2) 
+    return c
+
+def Complex2HSV(z, rmin=-100000., rmax=100000., hue_start=90):
+    # get amplidude of z and limit to [rmin, rmax]
+    amp = np.abs(z)
+    amp = np.where(amp < rmin, rmin, amp)
+    amp = np.where(amp > rmax, rmax, amp)
+    ph = np.angle(z, deg=1) + hue_start
+    # HSV are values in range [0,1]
+    h = (ph % 360) / 360
+    s = 0.85 * np.ones_like(h)
+    v = (amp -rmin) / (rmax - rmin)
+    return hsv_to_rgb(np.dstack((h,s,v)))
+
+
+
 
 class Grid(object):
     
@@ -73,13 +103,24 @@ class TimeIntegrator(object):
         dy = self.dy
         return  (u[i,j-1] -2.*u[i,j] + u[i,j+1] )/dy
     
-    def IC(self, Q=1., i=None,j=None):
+    def IC(self, t, k, Q=1., i=None,j=None):
+        omega = .05*pi
         if i is None:
             i = self.Nx/2 + 1
         if j is None:
             j = self.Ny/2 + 1
-            
-        self.u[i,j] = Q
+        
+        #p = omega*imag*Q*np.exp(imag*k*t*2.*pi)
+        p = omega*imag*Q
+        #self.u[i,j] = p
+        self.u[i-1,j] = p * np.exp(imag * (t * omega + pi*3.*.5)) #imag*pi
+        self.u[i,j-1] = p * np.exp(imag * (t * omega + pi)) #imag*3.*pi*.5
+        self.u[i+1,j] = p * np.exp(imag * (t * omega + pi*.5)) #
+        self.u[i,j+1] = p * np.exp(imag * (t * omega )) #imag*pi*.5
+        #self.u[i+1,j+1] = p
+        #self.u[i-1,j-1] = p
+        #self.u[i-1,j+1] = p
+        #self.u[i+1,j-1] = p
         return 
     
     #def Dt(self):
@@ -90,13 +131,17 @@ class TimeIntegrator(object):
         #nstep = maxtime / dt
         if ICfuncdict is None:
             ICfuncdict = {}
-            ICfuncdict[0] =  [self.IC, 1., self.Nx/2, 30 ]
-            ICfuncdict[1] =  [self.IC, 1., self.Nx/2, 70 ]
+            ICfuncdict[0] =  [self.IC, 10., self.Nx/2, self.Ny/2-self.Ny/10 ]
+            ICfuncdict[1] =  [self.IC, -10., self.Nx/2, self.Ny/2+self.Ny/10 ]
             #ICfuncdict[2] =  [self.IC, 1., 10, 55 ]
             #ICfuncdict[3] =  [self.IC, 1., 55, 10 ]
             #ICfuncdict[4] =  [self.IC, 1., 75, 75 ]
         
         t=0.
+        for func in ICfuncdict:
+            clist = ICfuncdict[func]
+            clist[0]( t, k=self.k, Q = clist[1], i = clist[2], j = clist[3] )
+            
         sc = dt/(2.*imag*self.k)
         while( t<maxtime ):
             t += dt
@@ -105,27 +150,67 @@ class TimeIntegrator(object):
                     self.u_update[i,j] = sc*( self.DDx(i,j) + self.DDy(i,j) ) + self.u[i,j]
                     for func in ICfuncdict:
                         clist = ICfuncdict[func]
-                        clist[0]( Q = clist[1], i = clist[2], j = clist[3] )
+                        clist[0]( t, k=self.k, Q = clist[1], i = clist[2], j = clist[3] )
             self.u[:,:] = self.u_update[:,:]
         return
     
     def plot(self):
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.set_title('colorMap')
-        plt.imshow(colorize(self.u) )
+        ax.set_title('Amplitude and Phase')
+        plt.imshow(colorize(self.u) , interpolation='none',extent=(-5,5,-5,5))
         ax.set_aspect('equal')
+        return
         
+    def plot_amp(self):
+        z = self.u
+        r = np.abs(z)
+        #arg = np.angle(z) 
         
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.set_title('amplitude')
+        plt.imshow(r , interpolation='none',extent=(-5,5,-5,5))
+        ax.set_aspect('equal')
+        return
+        
+    
+    def plot_phase(self):
+        z = self.u
+        #r = np.abs(z)
+        arg = np.angle(z) 
+        
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.set_title('phase')
+        plt.imshow(arg , interpolation='none',extent=(-5,5,-5,5))
+        ax.set_aspect('equal')
         return
         
         
     
     
 if __name__ == """__main__""":
-    grid = Grid(Nx=100, Ny=100)
+    grid = Grid(Nx=200, Ny=200)
     self = grid
     
     ti = TimeIntegrator(grid, k=250.)
-    ti.solve(maxtime=25.)
+    ti.solve(maxtime=10.)
     ti.plot()
+    #ti.plot_amp()
+    #ti.plot_phase()
+    
+    
+#N = 100
+#A = np.zeros((N,N),dtype='complex')
+#axis_x = np.linspace(-5,5,N)
+#axis_y = np.linspace(-5,5,N)
+#X,Y = np.meshgrid(axis_x,axis_y)
+#Z = X + Y*1j
+#
+#A = 1/(Z+1j)**2 + 1/(Z-2)**2
+#
+## Plot the array "A" using colorize
+#import pylab as plt
+#plt.imshow(colorize(A), interpolation='none',extent=(-5,5,-5,5))
+#plt.show()
