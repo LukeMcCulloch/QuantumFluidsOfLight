@@ -113,10 +113,10 @@ class TimeIntegrator(object):
         #p = omega*imag*Q*np.exp(imag*k*t*2.*pi)
         p = omega*imag*Q
         #self.u[i,j] = p
-        self.u[i-1,j] = p * np.exp(imag * (t * omega + pi*3.*.5)) #imag*pi
-        self.u[i,j-1] = p * np.exp(imag * (t * omega + pi)) #imag*3.*pi*.5
-        self.u[i+1,j] = p * np.exp(imag * (t * omega + pi*.5)) #
-        self.u[i,j+1] = p * np.exp(imag * (t * omega )) #imag*pi*.5
+        self.u_update[i-1,j] = p * np.exp(imag * (t * omega + pi*3.*.5)) #imag*pi
+        self.u_update[i,j-1] = p * np.exp(imag * (t * omega + pi)) #imag*3.*pi*.5
+        self.u_update[i+1,j] = p * np.exp(imag * (t * omega + pi*.5)) #
+        self.u_update[i,j+1] = p * np.exp(imag * (t * omega )) #imag*pi*.5
         #self.u[i+1,j+1] = p
         #self.u[i-1,j-1] = p
         #self.u[i-1,j+1] = p
@@ -133,9 +133,11 @@ class TimeIntegrator(object):
             ICfuncdict = {}
             ICfuncdict[0] =  [self.IC, 10., self.Nx/2, self.Ny/2-self.Ny/10 ]
             ICfuncdict[1] =  [self.IC, -10., self.Nx/2, self.Ny/2+self.Ny/10 ]
-            #ICfuncdict[2] =  [self.IC, 1., 10, 55 ]
-            #ICfuncdict[3] =  [self.IC, 1., 55, 10 ]
-            #ICfuncdict[4] =  [self.IC, 1., 75, 75 ]
+            
+#            ICfuncdict[2] =  [self.IC, 10., self.Nx/4, self.Ny/2-self.Ny/10 ]
+#            ICfuncdict[3] =  [self.IC, -10., self.Nx/4, self.Ny/2+self.Ny/10 ]
+#            ICfuncdict[4] =  [self.IC, 10., 3*self.Nx/4, self.Ny/2-self.Ny/10 ]
+#            ICfuncdict[5] =  [self.IC, -10., 3*self.Nx/4, self.Ny/2+self.Ny/10 ]
         
         t=0.
         for func in ICfuncdict:
@@ -148,9 +150,9 @@ class TimeIntegrator(object):
             for i in range(1,self.Nx+1):
                 for j in range(1,self.Ny+1):
                     self.u_update[i,j] = sc*( self.DDx(i,j) + self.DDy(i,j) ) + self.u[i,j]
-                    for func in ICfuncdict:
-                        clist = ICfuncdict[func]
-                        clist[0]( t, k=self.k, Q = clist[1], i = clist[2], j = clist[3] )
+            for func in ICfuncdict:
+                clist = ICfuncdict[func]
+                clist[0]( t, k=self.k, Q = clist[1], i = clist[2], j = clist[3] )
             self.u[:,:] = self.u_update[:,:]
         return
     
@@ -158,7 +160,7 @@ class TimeIntegrator(object):
         fig = plt.figure()
         ax = fig.add_subplot(111)
         ax.set_title('Amplitude and Phase')
-        plt.imshow(colorize(self.u) , interpolation='none',extent=(-5,5,-5,5))
+        plt.imshow(colorize(self.u) , interpolation='quadric')
         ax.set_aspect('equal')
         return
         
@@ -191,11 +193,11 @@ class TimeIntegrator(object):
     
     
 if __name__ == """__main__""":
-    grid = Grid(Nx=200, Ny=200)
+    grid = Grid(Nx=150, Ny=150)
     self = grid
     
     ti = TimeIntegrator(grid, k=250.)
-    ti.solve(maxtime=10.)
+    ti.solve(dt=.1, maxtime=20.)
     ti.plot()
     #ti.plot_amp()
     #ti.plot_phase()
