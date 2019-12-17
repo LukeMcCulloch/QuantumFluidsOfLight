@@ -117,10 +117,32 @@ class TimeIntegrator(object):
         self.u_update[i,j-1] = p * np.exp(imag * (t * omega + pi)) #imag*3.*pi*.5
         self.u_update[i+1,j] = p * np.exp(imag * (t * omega + pi*.5)) #
         self.u_update[i,j+1] = p * np.exp(imag * (t * omega )) #imag*pi*.5
-        #self.u[i+1,j+1] = p
-        #self.u[i-1,j-1] = p
-        #self.u[i-1,j+1] = p
-        #self.u[i+1,j-1] = p
+        
+        self.u[i+1,j+1] = p * np.exp(imag * (t * omega + .25*pi))
+        self.u[i-1,j-1] = p * np.exp(imag * (t * omega + .75*pi))
+        self.u[i-1,j+1] = p * np.exp(imag * (t * omega + 1.25*pi))
+        self.u[i+1,j-1] = p * np.exp(imag * (t * omega + 1.75*pi))
+        return 
+    
+    def iIC(self, t, k, Q=1., i=None,j=None):
+        omega = .05*pi
+        if i is None:
+            i = self.Nx/2 + 1
+        if j is None:
+            j = self.Ny/2 + 1
+        
+        #p = omega*imag*Q*np.exp(imag*k*t*2.*pi)
+        p = omega*imag*Q
+        #self.u[i,j] = p
+        self.u_update[i-1,j] = p * np.exp(imag * (-t * omega - pi*3.*.5)) #imag*pi
+        self.u_update[i,j-1] = p * np.exp(imag * (-t * omega - pi)) #imag*3.*pi*.5
+        self.u_update[i+1,j] = p * np.exp(imag * (-t * omega - pi*.5)) #
+        self.u_update[i,j+1] = p * np.exp(imag * (-t * omega )) #imag*pi*.5
+        
+#        self.u[i+1,j+1] = p * np.exp(imag * (-t * omega - .25*pi))
+#        self.u[i-1,j-1] = p * np.exp(imag * (-t * omega - .75*pi))
+#        self.u[i-1,j+1] = p * np.exp(imag * (-t * omega - 1.25*pi))
+#        self.u[i+1,j-1] = p * np.exp(imag * (-t * omega - 1.75*pi))
         return 
     
     #def Dt(self):
@@ -132,7 +154,7 @@ class TimeIntegrator(object):
         if ICfuncdict is None:
             ICfuncdict = {}
             ICfuncdict[0] =  [self.IC, 10., self.Nx/2, self.Ny/2-self.Ny/10 ]
-            ICfuncdict[1] =  [self.IC, -10., self.Nx/2, self.Ny/2+self.Ny/10 ]
+            ICfuncdict[1] =  [self.iIC, 10., self.Nx/2, self.Ny/2+self.Ny/10 ]
             
 #            ICfuncdict[2] =  [self.IC, 10., self.Nx/4, self.Ny/2-self.Ny/10 ]
 #            ICfuncdict[3] =  [self.IC, -10., self.Nx/4, self.Ny/2+self.Ny/10 ]
@@ -193,7 +215,7 @@ class TimeIntegrator(object):
     
     
 if __name__ == """__main__""":
-    grid = Grid(Nx=150, Ny=150)
+    grid = Grid(Nx=100, Ny=100)
     self = grid
     
     ti = TimeIntegrator(grid, k=250.)
