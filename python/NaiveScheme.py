@@ -106,43 +106,43 @@ class TimeIntegrator(object):
         dy = self.dy
         return  (u[i,j-1] -2.*u[i,j] + u[i,j+1] )/dy
     
-    def IC(self, t, k, Q=1., i=None,j=None):
-        omega = .05*pi
+    def IC(self, t, k, Q=1., omega=.05*pi, i=None,j=None):
+        #omega = 0.15*pi
         if i is None:
             i = self.Nx/2 + 1
         if j is None:
             j = self.Ny/2 + 1
         
         #p = omega*imag*Q*np.exp(imag*k*t*2.*pi)
-        #p = Q #
-        p = omega*imag*Q
+        p = Q #
+        #p = omega*imag*Q
         #self.u[i,j] = p
         self.u_update[i-1,j] = p * np.exp(imag * (t * omega + pi*3.*.5)) #imag*pi
         self.u_update[i,j-1] = p * np.exp(imag * (t * omega + pi)) #imag*3.*pi*.5
         self.u_update[i+1,j] = p * np.exp(imag * (t * omega + pi*.5)) #
         self.u_update[i,j+1] = p * np.exp(imag * (t * omega )) #imag*pi*.5
         
-        self.u[i+1,j+1] = p * np.exp(imag * (t * omega + .25*pi))
-        self.u[i-1,j-1] = p * np.exp(imag * (t * omega + .75*pi))
-        self.u[i-1,j+1] = p * np.exp(imag * (t * omega + 1.25*pi))
-        self.u[i+1,j-1] = p * np.exp(imag * (t * omega + 1.75*pi))
+#        self.u[i+1,j+1] = p * np.exp(imag * (t * omega + .25*pi))
+#        self.u[i-1,j-1] = p * np.exp(imag * (t * omega + .75*pi))
+#        self.u[i-1,j+1] = p * np.exp(imag * (t * omega + 1.25*pi))
+#        self.u[i+1,j-1] = p * np.exp(imag * (t * omega + 1.75*pi))
         return 
     
-    def iIC(self, t, k, Q=1., i=None,j=None):
-        omega = -.05*pi
+    def iIC(self, t, k, Q=1., omega = .05*pi, i=None,j=None):
+        #omega = .1*pi
         if i is None:
             i = self.Nx/2 + 1
         if j is None:
             j = self.Ny/2 + 1
         
         #p = omega*imag*Q*np.exp(imag*k*t*2.*pi)
-        #p = Q #
-        p = omega*imag*Q
+        p = Q #
+        #p = omega*imag*Q
         #self.u[i,j] = p
-        self.u_update[i-1,j] = p * np.exp(imag * (-t * omega - pi*3.*.5)) #imag*pi
-        self.u_update[i,j-1] = p * np.exp(imag * (-t * omega - pi)) #imag*3.*pi*.5
-        self.u_update[i+1,j] = p * np.exp(imag * (-t * omega - pi*.5)) #
-        self.u_update[i,j+1] = p * np.exp(imag * (-t * omega )) #imag*pi*.5
+        self.u_update[i-1,j] = p * np.exp(imag * (t * omega - pi*3.*.5)) #imag*pi
+        self.u_update[i,j-1] = p * np.exp(imag * (t * omega - pi)) #imag*3.*pi*.5
+        self.u_update[i+1,j] = p * np.exp(imag * (t * omega - pi*.5)) #
+        self.u_update[i,j+1] = p * np.exp(imag * (t * omega )) #imag*pi*.5
         
 #        self.u[i+1,j+1] = p * np.exp(imag * (-t * omega - .25*pi))
 #        self.u[i-1,j-1] = p * np.exp(imag * (-t * omega - .75*pi))
@@ -161,7 +161,7 @@ class TimeIntegrator(object):
             ICfuncdict[0] =  [self.IC,  10., self.Nx/2, self.Ny/2-self.Ny/10 ]
             ICfuncdict[1] =  [self.iIC, -10., self.Nx/2, self.Ny/2+self.Ny/10 ]
             
-#            ICfuncdict[2] =  [self.IC, 10., self.Nx/4, self.Ny/2-self.Ny/10 ]
+            ICfuncdict[2] =  [self.IC, 10., self.Nx/3, self.Ny/2]
 #            ICfuncdict[3] =  [self.IC, -10., self.Nx/4, self.Ny/2+self.Ny/10 ]
 #            ICfuncdict[4] =  [self.IC, 10., 3*self.Nx/4, self.Ny/2-self.Ny/10 ]
 #            ICfuncdict[5] =  [self.IC, -10., 3*self.Nx/4, self.Ny/2+self.Ny/10 ]
@@ -184,11 +184,13 @@ class TimeIntegrator(object):
         return
     
     def plot(self):
+        
         fig = plt.figure()
         ax = fig.add_subplot(111)
         ax.set_title('Amplitude and Phase')
         plt.imshow(colorize(self.u) , interpolation='quadric')
         ax.set_aspect('equal')
+        
         return
         
     def plot_amp(self):
@@ -224,7 +226,7 @@ if __name__ == """__main__""":
     self = grid
     
     ti = TimeIntegrator(grid, k=250.)
-    ti.solve(dt=.1, maxtime=20.)
+    ti.solve(dt=.005, maxtime=40.)
     ti.plot()
     #ti.plot_amp()
     #ti.plot_phase()
