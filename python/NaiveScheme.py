@@ -26,7 +26,10 @@ def colorize(z):
     idx = ~(np.isinf(z) + np.isnan(z))
     A = (np.angle(z[idx]) + np.pi) / (2*np.pi)
     A = (A + 0.5) % 1.0
+    
+    #A = (np.angle(z[idx]) ) 
     B = 1.0 - 1.0/(1.0+abs(z[idx])**0.3)
+    #B = abs(z[idx])
     c[idx] = [hls_to_rgb(a, b, 0.8) for a,b in zip(A,B)]
     return c
 
@@ -111,6 +114,7 @@ class TimeIntegrator(object):
             j = self.Ny/2 + 1
         
         #p = omega*imag*Q*np.exp(imag*k*t*2.*pi)
+        #p = Q #
         p = omega*imag*Q
         #self.u[i,j] = p
         self.u_update[i-1,j] = p * np.exp(imag * (t * omega + pi*3.*.5)) #imag*pi
@@ -125,13 +129,14 @@ class TimeIntegrator(object):
         return 
     
     def iIC(self, t, k, Q=1., i=None,j=None):
-        omega = .05*pi
+        omega = -.05*pi
         if i is None:
             i = self.Nx/2 + 1
         if j is None:
             j = self.Ny/2 + 1
         
         #p = omega*imag*Q*np.exp(imag*k*t*2.*pi)
+        #p = Q #
         p = omega*imag*Q
         #self.u[i,j] = p
         self.u_update[i-1,j] = p * np.exp(imag * (-t * omega - pi*3.*.5)) #imag*pi
@@ -153,8 +158,8 @@ class TimeIntegrator(object):
         #nstep = maxtime / dt
         if ICfuncdict is None:
             ICfuncdict = {}
-            ICfuncdict[0] =  [self.IC, 10., self.Nx/2, self.Ny/2-self.Ny/10 ]
-            ICfuncdict[1] =  [self.iIC, 10., self.Nx/2, self.Ny/2+self.Ny/10 ]
+            ICfuncdict[0] =  [self.IC,  10., self.Nx/2, self.Ny/2-self.Ny/10 ]
+            ICfuncdict[1] =  [self.iIC, -10., self.Nx/2, self.Ny/2+self.Ny/10 ]
             
 #            ICfuncdict[2] =  [self.IC, 10., self.Nx/4, self.Ny/2-self.Ny/10 ]
 #            ICfuncdict[3] =  [self.IC, -10., self.Nx/4, self.Ny/2+self.Ny/10 ]
@@ -223,6 +228,7 @@ if __name__ == """__main__""":
     ti.plot()
     #ti.plot_amp()
     #ti.plot_phase()
+    self = ti
     
     
 #N = 100
