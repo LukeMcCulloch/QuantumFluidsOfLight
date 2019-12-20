@@ -7,6 +7,8 @@ Created on Sat Dec 14 13:10:53 2019
 """
 
 import numpy as np
+import scipy as sp
+laplace = sp.ndimage.filters.laplace
 import matplotlib.pyplot as plt
 
 # https://stackoverflow.com/questions/17044052/mathplotlib-imshow-complex-2d-array
@@ -226,7 +228,7 @@ if __name__ == """__main__""":
     self = grid
     
     ti = TimeIntegrator(grid, k=250.)
-    ti.solve(dt=.005, maxtime=40.)
+    ti.solve(dt=.05, maxtime=10.)
     ti.plot()
     #ti.plot_amp()
     #ti.plot_phase()
