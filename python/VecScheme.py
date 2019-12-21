@@ -9,6 +9,8 @@ Created on Sat Dec 14 13:10:53 2019
 import numpy as np
 from numpy import exp
 #import scipy as sp
+import scipy.special as special
+Hermite = special.hermite
 #laplace = sp.ndimage.filters.laplace
 import matplotlib.pyplot as plt
 
@@ -65,7 +67,9 @@ def Complex2HSV(z, rmin=-100000., rmax=100000., hue_start=90):
 
 class Forcing(object):
     
-    def __init__(self, location):
+    def __init__(self, location, N, size):
+        self.N = N
+        self.size = size
         self.location = location
         
     
@@ -95,6 +99,29 @@ class Forcing(object):
             """Gaussian peak at (Lx/2, Ly/2)."""
             return exp( -(x**2+y**2) /  w**2 )
         return I
+    
+    def GaussHermite( self, n, m, A, w0, Field ):
+        N = self.N
+        size = self.size
+    
+        sqrt2w0 = np.sqrt(2.0)/w0
+        w02     = w0*w0
+        n2      = N/2
+        dx      = size/N
+    
+        for i in range(0,N):
+            x = (i-n2)*dx
+            x2 = x*x
+            sqrt2xw0 = sqrt2w0*x
+            
+            for j in range(0,N):
+                y = (j-n2)*dx
+                y2 = y*y
+                sqrt2yw0 = sqrt2w0*y
+                Field[i,j ] = (A*exp(-(x2+y2)/w02)*Hermite(m,sqrt2xw0)*Hermite(n,sqrt2yw0) , 0.0)
+        
+        
+        return Field
     
     
 
