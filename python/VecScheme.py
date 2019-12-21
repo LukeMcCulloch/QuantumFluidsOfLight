@@ -65,19 +65,40 @@ def Complex2HSV(z, rmin=-100000., rmax=100000., hue_start=90):
 
 class Forcing(object):
     
-    def __init__(self):
-        return
+    def __init__(self, location):
+        self.location = location
+        
+    
+    
+    def gaussian(Lx=10, Ly=10,c=1.0):
+        """
+        Initial Gaussian bell in the middle of the domain.
+        """
+    
+    
+        def I(x, y):
+            """Gaussian peak at (Lx/2, Ly/2)."""
+            return exp(-0.5*(x-Lx/2.0)**2 - 0.5*(y-Ly/2.0)**2)
+    
+        return I
+    
+    
+    
+    def gaussian2(self, Lx=10, Ly=10,c=1.0):
+        """
+        Initial Gaussian bell in the domain.
+        """
+        
+    
+    
+        def I(x, y, w):
+            """Gaussian peak at (Lx/2, Ly/2)."""
+            return exp( -(x**2+y**2) /  w**2 )
+        return I
+    
+    
 
-def gaussian(Lx=10, Ly=10,c=1.0):
-    """
-    Initial Gaussian bell in the middle of the domain.
-    """
 
-
-    def I(x, y):
-        """Gaussian peak at (Lx/2, Ly/2)."""
-        return exp(-0.5*(x-Lx/2.0)**2 - 0.5*(y-Ly/2.0)**2)
-    return I
 
 
 
