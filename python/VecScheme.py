@@ -326,7 +326,8 @@ if __name__ == """__main__""":
     
     ti.solve(dt=.1, 
              maxtime=200.,
-             ICfuncdict=ICfuncdict)
+             ICfuncdict=ICfuncdict,
+             w=1.99)
     ti.plot()
     #ti.plot_amp()
     #ti.plot_phase()
