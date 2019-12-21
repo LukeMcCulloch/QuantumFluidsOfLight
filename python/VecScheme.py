@@ -33,7 +33,7 @@ def colorize(z):
     A = (A + 0.5) % 1.0
     
     #A = (np.angle(z[idx]) ) 
-    B = 1.0 - 1.0/(1.0+abs(z[idx])**0.3)
+    B = 1.0 - 1.0/(1.0+abs(z[idx])**0.1)
     #B = abs(z[idx])
     c[idx] = [hls_to_rgb(a, b, 0.8) for a,b in zip(A,B)]
     return c
@@ -234,7 +234,7 @@ class TimeIntegrator(object):
     #    return 
     
     def solve(self, dt=.1, maxtime = 1.,
-              ICfuncdict = None):
+              ICfuncdict = None, w=1.9):
         
         t=0.
         for func in ICfuncdict:
@@ -255,6 +255,8 @@ class TimeIntegrator(object):
                
             self.u_update[1:-1,1:-1] = u_n[1:-1,1:-1] + \
                                              sc* (  Cx2*self.DDx() + Cy2*self.DDy() ) 
+            self.u_update[1:-1,1:-1] =  w*self.u_update[1:-1,1:-1] + \
+                                                (1.-w)*self.u[1:-1,1:-1]
             
 
             for func in ICfuncdict:
@@ -305,13 +307,11 @@ class TimeIntegrator(object):
     
     
 if __name__ == """__main__""":
+    
     grid = Grid(Nx=300, Ny=300)
     self = grid
     
-    
-
-    
-    ti = TimeIntegrator(grid, k=500.)
+    ti = TimeIntegrator(grid, k=1000.)
     
     ICfuncdict = {}
     #ICfuncdict[0] =  [ti.IC,  10., ti.Nx/2, ti.Ny/2]#
@@ -325,7 +325,7 @@ if __name__ == """__main__""":
     #ICfuncdict[5] =  [ti.IC, -10., 3*ti.Nx/4, ti.Ny/2+ti.Ny/10 ]
     
     ti.solve(dt=.1, 
-             maxtime=100.,
+             maxtime=200.,
              ICfuncdict=ICfuncdict)
     ti.plot()
     #ti.plot_amp()
