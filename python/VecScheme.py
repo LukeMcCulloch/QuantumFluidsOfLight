@@ -62,6 +62,12 @@ def Complex2HSV(z, rmin=-100000., rmax=100000., hue_start=90):
     return hsv_to_rgb(np.dstack((h,s,v)))
 
 
+
+class Forcing(object):
+    
+    def __init__(self):
+        return
+
 def gaussian(Lx=10, Ly=10,c=1.0):
     """
     Initial Gaussian bell in the middle of the domain.
@@ -77,7 +83,10 @@ def gaussian(Lx=10, Ly=10,c=1.0):
 
 class Grid(object):
     
-    def __init__(self, hx=.01, hy=.01, Nx=100, Ny=100, lx=1., ly=1.):
+    def __init__(self, 
+                 hx=.01, hy=.01, 
+                 Nx=100, Ny=100, 
+                 lx=1.,  ly=1.):
         self.hx = hx
         self.hy = hy
         self.Nx = Nx
@@ -167,10 +176,10 @@ class TimeIntegrator(object):
         self.u_update[i+1,j] = p * np.exp(imag * (t * omega - pi*.5)) #
         self.u_update[i,j+1] = p * np.exp(imag * (t * omega )) #imag*pi*.5
         
-#        self.u[i+1,j+1] = p * np.exp(imag * (-t * omega - .25*pi))
-#        self.u[i-1,j-1] = p * np.exp(imag * (-t * omega - .75*pi))
-#        self.u[i-1,j+1] = p * np.exp(imag * (-t * omega - 1.25*pi))
-#        self.u[i+1,j-1] = p * np.exp(imag * (-t * omega - 1.75*pi))
+        #        self.u[i+1,j+1] = p * np.exp(imag * (-t * omega - .25*pi))
+        #        self.u[i-1,j-1] = p * np.exp(imag * (-t * omega - .75*pi))
+        #        self.u[i-1,j+1] = p * np.exp(imag * (-t * omega - 1.25*pi))
+        #        self.u[i+1,j-1] = p * np.exp(imag * (-t * omega - 1.75*pi))
         return 
     
     #def Dt(self):
@@ -178,19 +187,6 @@ class TimeIntegrator(object):
     
     def solve(self, dt=.1, maxtime = 1.,
               ICfuncdict = None):
-        #nstep = maxtime / dt
-        if ICfuncdict is None:
-            ICfuncdict = {}
-            #ICfuncdict[0] =  [self.IC,  10., self.Nx/2, self.Ny/2]#
-            #ICfuncdict[0] =  [self.IC,  10., self.Nx/2, self.Ny/2-self.Ny/10 ]
-            ICfuncdict[0] =  [self.IC,  10., self.Nx/2, self.Ny/2-self.Ny/10 ]
-            ICfuncdict[1] =  [self.iIC, -10., self.Nx/2, self.Ny/2+self.Ny/10 ]
-            
-            ICfuncdict[2] =  [self.IC, 10., self.Nx/3, self.Ny/2]
-#            ICfuncdict[3] =  [self.IC, -10., self.Nx/4, self.Ny/2+self.Ny/10 ]
-#            ICfuncdict[4] =  [self.IC, 10., 3*self.Nx/4, self.Ny/2-self.Ny/10 ]
-#            ICfuncdict[5] =  [self.IC, -10., 3*self.Nx/4, self.Ny/2+self.Ny/10 ]
-        
         
         t=0.
         for func in ICfuncdict:
@@ -264,24 +260,42 @@ if __name__ == """__main__""":
     grid = Grid(Nx=300, Ny=300)
     self = grid
     
+    
+
+    
     ti = TimeIntegrator(grid, k=500.)
-    ti.solve(dt=.1, maxtime=100.)
+    
+    ICfuncdict = {}
+    #ICfuncdict[0] =  [ti.IC,  10., ti.Nx/2, ti.Ny/2]#
+    #ICfuncdict[0] =  [ti.IC,  10., ti.Nx/2, ti.Ny/2-ti.Ny/10 ]
+    ICfuncdict[0] =  [ti.IC,  10., ti.Nx/2, ti.Ny/2-ti.Ny/10 ]
+    ICfuncdict[1] =  [ti.iIC, -10., ti.Nx/2, ti.Ny/2+ti.Ny/10 ]
+    
+    ICfuncdict[2] =  [ti.IC, 10., ti.Nx/3, ti.Ny/2]
+    #ICfuncdict[3] =  [ti.IC, -10., ti.Nx/4, ti.Ny/2+ti.Ny/10 ]
+    #ICfuncdict[4] =  [ti.IC, 10., 3*ti.Nx/4, ti.Ny/2-ti.Ny/10 ]
+    #ICfuncdict[5] =  [ti.IC, -10., 3*ti.Nx/4, ti.Ny/2+ti.Ny/10 ]
+    
+    ti.solve(dt=.1, 
+             maxtime=100.,
+             ICfuncdict=ICfuncdict)
     ti.plot()
     #ti.plot_amp()
     #ti.plot_phase()
     self = ti
     
-    
-#N = 100
-#A = np.zeros((N,N),dtype='complex')
-#axis_x = np.linspace(-5,5,N)
-#axis_y = np.linspace(-5,5,N)
-#X,Y = np.meshgrid(axis_x,axis_y)
-#Z = X + Y*1j
-#
-#A = 1/(Z+1j)**2 + 1/(Z-2)**2
-#
-## Plot the array "A" using colorize
-#import pylab as plt
-#plt.imshow(colorize(A), interpolation='none',extent=(-5,5,-5,5))
-#plt.show()
+"""
+N = 100
+A = np.zeros((N,N),dtype='complex')
+axis_x = np.linspace(-5,5,N)
+axis_y = np.linspace(-5,5,N)
+X,Y = np.meshgrid(axis_x,axis_y)
+Z = X + Y*1j
+
+A = 1/(Z+1j)**2 + 1/(Z-2)**2
+
+# Plot the array "A" using colorize
+import pylab as plt
+plt.imshow(colorize(A), interpolation='quadric',extent=(-5,5,-5,5))
+plt.show()
+#"""
