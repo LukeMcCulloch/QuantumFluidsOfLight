@@ -208,13 +208,7 @@ class TimeIntegrator(object):
             
             t += dt
             
-            #u_xx = u_n[:-2,1:-1] - 2*u_n[1:-1,1:-1] + u_n[2:,1:-1]
-            #u_yy = u_n[1:-1,:-2] - 2*u_n[1:-1,1:-1] + u_n[1:-1,2:]
-            
-            
-            #            self.u_update[1:-1,1:-1] = u_n[1:-1,1:-1] + \
-            #                                             sc* (  Cx2*u_xx + Cy2*u_yy ) 
-                                             
+               
             self.u_update[1:-1,1:-1] = u_n[1:-1,1:-1] + \
                                              sc* (  Cx2*self.DDx() + Cy2*self.DDy() ) 
             
@@ -270,8 +264,8 @@ if __name__ == """__main__""":
     grid = Grid(Nx=300, Ny=300)
     self = grid
     
-    ti = TimeIntegrator(grid, k=250.)
-    ti.solve(dt=.1, maxtime=20.)
+    ti = TimeIntegrator(grid, k=500.)
+    ti.solve(dt=.1, maxtime=100.)
     ti.plot()
     #ti.plot_amp()
     #ti.plot_phase()
